@@ -2,29 +2,21 @@ package services
 
 import (
 	"bbs-go/internal/models/constants"
-	"bbs-go/internal/pkg/bbsurls"
-	"bbs-go/internal/pkg/config"
-	"bbs-go/internal/pkg/es"
 	"bbs-go/internal/pkg/event"
+	"bbs-go/internal/pkg/search"
 	"errors"
-	"log/slog"
 	"math"
 	"net/http"
-	"path"
-	"time"
 
 	"github.com/mlogclub/simple/common/dates"
-	"github.com/mlogclub/simple/common/files"
 	"github.com/mlogclub/simple/common/strs"
 	"github.com/mlogclub/simple/sqls"
 	"github.com/mlogclub/simple/web/params"
 
-	"github.com/gorilla/feeds"
 	"gorm.io/gorm"
 
 	"bbs-go/internal/cache"
 	"bbs-go/internal/models"
-	"bbs-go/internal/pkg/common"
 	"bbs-go/internal/repositories"
 )
 
@@ -70,7 +62,7 @@ func (s *topicService) Updates(id int64, columns map[string]interface{}) error {
 	}
 
 	// 添加索引
-	es.UpdateTopicIndex(s.Get(id))
+	search.UpdateTopicIndex(s.Get(id))
 
 	return nil
 }
@@ -81,7 +73,7 @@ func (s *topicService) UpdateColumn(id int64, name string, value interface{}) er
 	}
 
 	// 添加索引
-	es.UpdateTopicIndex(s.Get(id))
+	search.UpdateTopicIndex(s.Get(id))
 
 	return nil
 }
@@ -95,7 +87,7 @@ func (s *topicService) Delete(topicId, deleteUserId int64, r *http.Request) erro
 	err := repositories.TopicRepository.UpdateColumn(sqls.DB(), topicId, "status", constants.StatusDeleted)
 	if err == nil {
 		// 添加索引
-		es.UpdateTopicIndex(s.Get(topicId))
+		search.DeleteTopicIndex(topicId)
 		// 删掉标签文章
 		TopicTagService.DeleteByTopicId(topicId)
 		// 发送事件
@@ -115,7 +107,7 @@ func (s *topicService) Undelete(id int64) error {
 		// 删掉标签文章
 		TopicTagService.UndeleteByTopicId(id)
 		// 添加索引
-		es.UpdateTopicIndex(s.Get(id))
+		search.UpdateTopicIndex(s.Get(id))
 	}
 	return err
 }
@@ -160,7 +152,7 @@ func (s *topicService) Edit(topicId, nodeId int64, tags []string, title, content
 	})
 
 	// 添加索引
-	es.UpdateTopicIndex(s.Get(topicId))
+	search.UpdateTopicIndex(s.Get(topicId))
 
 	return err
 }
@@ -194,7 +186,7 @@ func (s *topicService) SetRecommend(topicId int64, recommend bool) error {
 	})
 
 	// 添加索引
-	es.UpdateTopicIndex(s.Get(topicId))
+	search.UpdateTopicIndex(s.Get(topicId))
 
 	return nil
 }
@@ -350,52 +342,6 @@ func (s *topicService) onComment(tx *gorm.DB, topicId int64, comment *models.Com
 	return nil
 }
 
-// rss
-func (s *topicService) GenerateRss() {
-	topics := repositories.TopicRepository.Find(sqls.DB(),
-		sqls.NewCnd().Where("status = ?", constants.StatusOk).Desc("id").Limit(200))
-
-	var items []*feeds.Item
-	for _, topic := range topics {
-		topicUrl := bbsurls.TopicUrl(topic.Id)
-		user := cache.UserCache.Get(topic.UserId)
-		if user == nil {
-			continue
-		}
-		item := &feeds.Item{
-			Title:       topic.Title,
-			Link:        &feeds.Link{Href: topicUrl},
-			Description: common.GetMarkdownSummary(topic.Content),
-			Author:      &feeds.Author{Name: user.Avatar, Email: user.Email.String},
-			Created:     dates.FromTimestamp(topic.CreateTime),
-		}
-		items = append(items, item)
-	}
-	siteTitle := cache.SysConfigCache.GetValue(constants.SysConfigSiteTitle)
-	siteDescription := cache.SysConfigCache.GetValue(constants.SysConfigSiteDescription)
-	feed := &feeds.Feed{
-		Title:       siteTitle,
-		Link:        &feeds.Link{Href: config.Instance.BaseUrl},
-		Description: siteDescription,
-		Author:      &feeds.Author{Name: siteTitle},
-		Created:     time.Now(),
-		Items:       items,
-	}
-	atom, err := feed.ToAtom()
-	if err != nil {
-		slog.Error(err.Error(), slog.Any("err", err))
-	} else {
-		_ = files.WriteString(path.Join(config.Instance.StaticPath, "topic_atom.xml"), atom, false)
-	}
-
-	rss, err := feed.ToRss()
-	if err != nil {
-		slog.Error(err.Error(), slog.Any("err", err))
-	} else {
-		_ = files.WriteString(path.Join(config.Instance.StaticPath, "topic_rss.xml"), rss, false)
-	}
-}
-
 func (s *topicService) ScanByUser(userId int64, callback func(topics []models.Topic)) {
 	var cursor int64 = 0
 	for {
@@ -427,7 +373,6 @@ func (s *topicService) ScanDesc(callback func(topics []models.Topic)) {
 	var cursor int64 = math.MaxInt64
 	for {
 		list := repositories.TopicRepository.Find(sqls.DB(), sqls.NewCnd().
-			Cols("id", "status", "create_time").
 			Lt("id", cursor).Desc("id").Limit(1000))
 		if len(list) == 0 {
 			break

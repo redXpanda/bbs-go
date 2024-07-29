@@ -25,6 +25,11 @@
 </template>
 
 <script setup>
+defineExpose({
+  refresh,
+  unshiftResults,
+});
+
 const props = defineProps({
   // 请求URL
   url: {
@@ -80,14 +85,15 @@ async function loadMore() {
   }
 }
 
-async function refresh() {
+function refresh() {
   pageData.cursor = "";
   pageData.results = [];
   pageData.hasMore = true;
-  await loadMore();
+  return loadMore();
 }
 
 function renderData(data) {
+  data = data || {};
   pageData.cursor = data.cursor;
   pageData.hasMore = data.hasMore;
   if (data.results && data.results.length) {
@@ -102,11 +108,6 @@ function unshiftResults(item) {
     pageData.results.unshift(item);
   }
 }
-
-defineExpose({
-  refresh,
-  unshiftResults,
-});
 </script>
 
 <style lang="scss" scoped>

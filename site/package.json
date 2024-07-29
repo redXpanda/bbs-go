@@ -11,14 +11,14 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
-    "@element-plus/nuxt": "^1.0.7",
+    "@element-plus/nuxt": "^1.0.9",
     "@nuxt/devtools": "latest",
     "@nuxtjs/color-mode": "^3.3.2",
     "@nuxtjs/eslint-module": "^4.1.0",
-    "@vueuse/core": "^10.7.2",
-    "@vueuse/nuxt": "^10.7.2",
-    "bulma": "^0.9.4",
-    "element-plus": "^2.5.5",
+    "@vueuse/core": "^10.10.0",
+    "@vueuse/nuxt": "^10.10.0",
+    "bulma": "^1.0.1",
+    "element-plus": "^2.7.4",
     "eslint": "^8.56.0",
     "nuxt": "^3.10.0",
     "sass": "^1.70.0",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
     "animate.css": "^4.1.1",
-    "md-editor-v3": "^4.11.2",
+    "md-editor-v3": "^4.15.6",
     "nuxt-lazy-load": "^3.0.4"
   }
 }

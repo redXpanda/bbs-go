@@ -5,9 +5,9 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@vueuse/nuxt',
+    // https://color-mode.nuxtjs.org/#configuration
     '@nuxtjs/color-mode',
     '@element-plus/nuxt',
-
     ['nuxt-lazy-load', {
       images: true,
       videos: true,
@@ -38,6 +38,12 @@ export default defineNuxtConfig({
   colorMode: {
     preference: 'system', // default value of $colorMode.preference
     fallback: 'light', // fallback value if not system preference found
+    storageKey: 'bbsgo-color-mode',
+    // classPrefix: '',
+    // classSuffix: '-mode',
+
+    classPrefix: 'theme-',
+    classSuffix: '',
   },
 
   imports: {
@@ -49,17 +55,19 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'BBS-GO',
-      htmlAttrs: { class: 'light-mode' },
-      // bodyAttrs: { class: 'bg-gray-50' },
-      // htmlAttrs: { class: 'bg-gray-50' },
+      htmlAttrs: { class: 'theme-light' },
+      script: [
+        {
+          src: 'https://hm.baidu.com/hm.js?79b8ff82974d0769ef5c629e4cd46629',
+          type: 'text/javascript',
+          async: true
+        }
+      ]
     },
   },
   css: [
     '~/assets/css/index.scss',
   ],
-  pinia: {
-    autoImports: ['defineStore', 'storeToRefs'],
-  },
   nitro: {
     routeRules: {
       '/api/**': {

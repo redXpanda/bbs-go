@@ -18,9 +18,9 @@
         </div>
       </article>
       <div v-else class="topic-create-form">
-        <h1 class="title">
+        <div class="topic-form-title">
           {{ postForm.type === 0 ? "发帖子" : "发动态" }}
-        </h1>
+        </div>
 
         <div class="field">
           <div class="control">
@@ -118,6 +118,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: "auth",
+});
+
 const userStore = useUserStore();
 const configStore = useConfigStore();
 const route = useRoute();
@@ -166,7 +170,7 @@ watch(
   () => route.query,
   (newQuery, oldQuery) => {
     // eslint-disable-next-line no-console
-    console.log(newQuery, oldQuery);
+    // console.log(newQuery, oldQuery);
 
     init();
   },

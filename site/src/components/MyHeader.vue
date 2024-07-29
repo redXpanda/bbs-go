@@ -30,7 +30,8 @@
 
         <div class="navbar-end">
           <div class="navbar-item">
-            <!-- <search-input /> -->
+            <search-input />
+            <!-- <nuxt-link to="/search">xxxx</nuxt-link> -->
           </div>
 
           <div class="navbar-item">
@@ -43,14 +44,14 @@
             v-if="user"
             class="navbar-item has-dropdown is-hoverable user-menus"
           >
-            <nuxt-link :to="`/user/${user.id}`" class="navbar-link">
-              <client-only>
-                <my-avatar :user="user" :size="24" round />
-              </client-only>
-              <span class="user-menus-nickname ellipsis">{{
-                user.nickname
-              }}</span>
-            </nuxt-link>
+            <div class="navbar-link">
+              <MyAvatar :user="user" :size="24" />
+              <span
+                :to="`/user/${user.id}`"
+                class="user-menus-nickname ellipsis"
+                >{{ user.nickname }}</span
+              >
+            </div>
             <div class="navbar-dropdown">
               <nuxt-link class="navbar-item" :to="`/user/${user.id}`">
                 <i class="iconfont icon-username" />
@@ -138,14 +139,20 @@ async function signout() {
 }
 
 .user-menus {
-  .user-menus-nickname {
-    // margin-left: 5px;
-    padding: 0 4px;
-    font-size: 14px;
+  .navbar-link {
+    display: flex;
+    align-items: center;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    .user-menus-nickname {
+      margin-left: 5px;
+      padding: 0 4px;
+      font-size: 14px;
+      color: var(--text-color);
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
   .navbar-dropdown {
     border: 1px solid var(--border-color);

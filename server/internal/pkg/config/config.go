@@ -1,16 +1,17 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/mlogclub/simple/sqls"
 )
 
 var Instance *Config
 
 type Config struct {
-	Env        string // 环境：prod、dev
+	Env        string // 环境
 	BaseUrl    string // base url
 	Port       string // 端口
-	StaticPath string // 静态文件目录
 	IpDataPath string // IP数据文件
 
 	// 日志配置
@@ -69,9 +70,12 @@ type Config struct {
 		SSL      bool
 	}
 
-	// es
-	Es struct {
-		Url   string
-		Index string
+	Search struct {
+		IndexPath string
 	}
+}
+
+func (c *Config) IsProd() bool {
+	e := strings.ToLower(c.Env)
+	return e == "prod" || e == "production"
 }

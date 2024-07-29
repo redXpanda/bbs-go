@@ -2,7 +2,7 @@
   <section class="main">
     <div class="container">
       <div class="topic-create-form" v-if="postForm">
-        <h1 class="title">修改话题</h1>
+        <div class="topic-form-title">修改话题</div>
 
         <div class="field">
           <div class="control">
@@ -82,6 +82,7 @@
 definePageMeta({
   middleware: "auth",
 });
+
 useHead({
   title: useSiteTitle("修改话题"),
 });

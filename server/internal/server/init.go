@@ -2,16 +2,18 @@ package server
 
 import (
 	"bbs-go/internal/models"
-	"bbs-go/internal/pkg/common"
 	"bbs-go/internal/pkg/config"
 	"bbs-go/internal/pkg/gormlogs"
 	"bbs-go/internal/pkg/iplocator"
+	"bbs-go/internal/pkg/search"
 	"bbs-go/internal/scheduler"
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/mlogclub/simple/common/jsons"
 	"github.com/mlogclub/simple/common/strs"
 	"github.com/mlogclub/simple/sqls"
 	"github.com/spf13/viper"
@@ -24,6 +26,7 @@ func Init() {
 	initDB()
 	initCron()
 	initIpLocator()
+	initSearch()
 }
 
 func initConfig() {
@@ -39,6 +42,9 @@ func initConfig() {
 	viper.AddConfigPath("$HOME/.bbs-go")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("../../")
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("BBSGO")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
@@ -47,6 +53,10 @@ func initConfig() {
 	if err := viper.Unmarshal(&config.Instance); err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+
+	config.Instance.Env = env
+
+	slog.Info("Load config", slog.String("ENV", env), slog.String("config", jsons.ToJsonStr(config.Instance)))
 }
 
 func initDB() {
@@ -62,11 +72,15 @@ func initDB() {
 }
 
 func initCron() {
-	if common.IsProd() {
+	if config.Instance.IsProd() {
 		scheduler.Start()
 	}
 }
 
 func initIpLocator() {
 	iplocator.InitIpLocator(config.Instance.IpDataPath)
+}
+
+func initSearch() {
+	search.Init(config.Instance.Search.IndexPath)
 }

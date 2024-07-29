@@ -18,7 +18,7 @@
         </div>
       </article>
       <div v-else class="article-create-form">
-        <h1 class="title">发文章</h1>
+        <div class="article-form-title">发文章</div>
         <div class="field">
           <div class="control">
             <input
@@ -109,7 +109,7 @@ definePageMeta({
 if (!configStore.isEnabledArticle) {
   throw createError({
     statusCode: 403,
-    statusMessage: "已关闭文章功能",
+    message: "已关闭文章功能",
   });
 }
 
@@ -147,6 +147,21 @@ async function submitCreate() {
 .article-create-form {
   background-color: var(--bg-color);
   padding: 30px;
+
+  .article-form-title {
+    font-size: 36px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .field {
+    margin-bottom: 10px;
+
+    input {
+      &:focus-visible {
+        outline-width: 0;
+      }
+    }
+  }
 }
 
 .cover-add-btn {

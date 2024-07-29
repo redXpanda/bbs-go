@@ -40,7 +40,7 @@ export default {
     },
     round: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     hasBorder: {
       type: Boolean,

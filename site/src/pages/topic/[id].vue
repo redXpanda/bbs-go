@@ -19,7 +19,7 @@
             >
               <div class="topic-header">
                 <div class="topic-header-left">
-                  <my-avatar :user="topic.user" size="45" />
+                  <my-avatar :user="topic.user" :size="45" />
                 </div>
                 <div class="topic-header-center">
                   <div class="topic-nickname" itemprop="headline">
@@ -128,9 +128,8 @@
                   v-for="likeUser in likeUsers"
                   :key="likeUser.id"
                   :user="likeUser"
-                  :round="true"
-                  :has-border="true"
-                  size="24"
+                  :size="24"
+                  has-border
                 />
                 <span class="like-count">{{ topic.likeCount }}</span>
               </div>
@@ -268,14 +267,14 @@ async function like() {
 
 async function addFavorite(topicId) {
   try {
-    if (this.topic.favorited) {
+    if (topic.value.favorited) {
       await useHttpPostForm("/api/favorite/delete", {
         body: {
           entityType: "topic",
           entityId: topicId,
         },
       });
-      this.topic.favorited = false;
+      topic.value.favorited = false;
       useMsgSuccess("已取消收藏");
     } else {
       await useHttpPostForm("/api/favorite/add", {
@@ -284,7 +283,7 @@ async function addFavorite(topicId) {
           entityId: topicId,
         },
       });
-      this.topic.favorited = true;
+      topic.value.favorited = true;
       useMsgSuccess("收藏成功");
     }
   } catch (e) {
